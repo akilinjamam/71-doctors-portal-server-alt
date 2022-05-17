@@ -64,6 +64,9 @@ async function run() {
         const bookingCollection = client.db('doctors_portal').collection('bookings')
         const userCollection = client.db('doctors_portal').collection('users')
 
+        console.log('all route is working')
+
+
         app.get('/service', async (req, res) => {
 
             const query = {};
