@@ -1,3 +1,4 @@
+// server for doctors portal
 const express = require('express')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const jwt = require('jsonwebtoken');
@@ -32,6 +33,7 @@ console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 // this section is for jwt
+//--------------------------------------------------------------------------
 function verifyJWT(req, res, next) {
     // console.log('abc')
     const authHeader = req.headers.authorization;
@@ -48,6 +50,8 @@ function verifyJWT(req, res, next) {
         next()
     });
 }
+
+//--------------------------------------------------------------------------
 
 // operatin CRUD operation.
 
