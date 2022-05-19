@@ -3,7 +3,7 @@ const express = require('express')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const res = require('express/lib/response');
+// const res = require('express/lib/response');
 const app = express()
 require('dotenv').config();
 const port = process.env.PORT || 5000
@@ -94,7 +94,7 @@ async function run() {
 
 
         // for payment method
-        app.post('create-payment-intent', verifyJWT, async (req, res) => {
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
             const service = req.body;
             const price = service.price;
             const amount = price * 100;
@@ -102,7 +102,7 @@ async function run() {
                 amount: amount,
                 currency: 'usd',
                 payment_method_types: ['card']
-            })
+            });
             res.send({ clientSecret: paymentIntent.client_secret })
         })
 
