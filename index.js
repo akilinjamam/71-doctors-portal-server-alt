@@ -98,7 +98,7 @@ async function run() {
             const service = req.body;
             const price = service.price;
             const amount = price * 100;
-            const paymentIntent = await stripe.paymentIntent.create({
+            const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
                 currencty: 'usd',
                 payment_mathod_types: [card]
