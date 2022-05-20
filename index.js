@@ -66,6 +66,7 @@ async function run() {
         const bookingCollection = client.db('doctors_portal').collection('bookings')
         const userCollection = client.db('doctors_portal').collection('users')
         const doctorCollection = client.db('doctors_portal').collection('doctors')
+        const paymentCollection = client.db('doctors_portal').collection('payment')
 
         console.log('all route is working');
 
@@ -208,6 +209,22 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const booking = await bookingCollection.findOne(query);
             res.send(booking);
+        })
+
+        app.patch('/bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                }
+            }
+
+            const updateBooking = await bookingCollection.updateOne(filter, updatedDoc);
+            const result = await paymentCollection.insertOne(payment)
+            res.send(updatedDoc);
         })
 
 
