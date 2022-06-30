@@ -67,10 +67,12 @@ async function run() {
         const userCollection = client.db('doctors_portal').collection('users')
         const doctorCollection = client.db('doctors_portal').collection('doctors')
         const paymentCollection = client.db('doctors_portal').collection('payment')
+        const completeCollection = client.db('doctors_portal').collection('complete')
+        const doneCollection = client.db('doctors_portal').collection('done')
 
         console.log('all route is working');
 
-
+        // verify wether users are admins or normal users. 
         const verifyAdmin = async (req, res, next) => {
             const requester = req.decoded.email;
             const requesterAccount = await userCollection.findOne({ email: requester });
@@ -83,6 +85,8 @@ async function run() {
             }
 
         }
+        //--------------------------------------------------------------
+
 
 
         app.get('/service', async (req, res) => {
@@ -93,6 +97,7 @@ async function run() {
             res.send(services);
         })
 
+        //--------------------------------------------------------------
 
         // for payment method
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
@@ -107,7 +112,7 @@ async function run() {
             res.send({ clientSecret: paymentIntent.client_secret })
         })
 
-
+        //-----------------------------------------------------------------
 
         app.get('/available', async (req, res) => {
             const date = req.query.date || 'May 15, 2022'
@@ -135,6 +140,8 @@ async function run() {
             res.send(services)
         })
 
+        //--------------------------------------------------------------------------------
+
         app.get('/user', verifyJWT, async (req, res) => {
 
             const query = {}
@@ -143,6 +150,8 @@ async function run() {
             res.send(users)
         })
 
+        //-----------------------------------------------------------------------------------
+
 
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -150,7 +159,7 @@ async function run() {
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin });
         })
-
+        //-------------------------------------------------------------------------------------
 
         // to make an user admin and checking the user who is giving permission to make an admin, is admin or normal user. if he is a normal user, he is not allowed to create admin and if he is an admin he can do so.
 
@@ -165,7 +174,7 @@ async function run() {
 
         })
 
-
+        //--------------------------------------------------------------------------------------
 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -181,6 +190,8 @@ async function run() {
             res.send({ result, token });
 
         })
+
+        //-----------------------------------------------------------------------------------
 
         app.get('/bookings', verifyJWT, async (req, res) => {
             const patient = req.query.patient;
@@ -203,6 +214,8 @@ async function run() {
 
         })
 
+        //----------------------------------------------------------------------------------
+
         app.get('/bookings/:id', verifyJWT, async (req, res) => {
 
             const id = req.params.id;
@@ -210,6 +223,8 @@ async function run() {
             const booking = await bookingCollection.findOne(query);
             res.send(booking);
         })
+
+        //------------------------------------------------------------------------------
 
         app.patch('/bookings/:id', async (req, res) => {
             const id = req.params.id;
@@ -227,6 +242,7 @@ async function run() {
             res.send(updatedDoc);
         })
 
+        //--------------------------------------------------------------------------------------
 
 
         app.get('/doctor', verifyJWT, verifyAdmin, async (req, res) => {
@@ -236,12 +252,15 @@ async function run() {
         })
 
 
+        //---------------------------------------------------------------------------------------
         app.post('/doctor', verifyJWT, verifyAdmin, async (req, res) => {
 
             const doctors = req.body;
             const result = await doctorCollection.insertOne(doctors);
             res.send(result)
         })
+
+        //----------------------------------------------------------------------------------------
 
         app.delete('/doctor/:email', verifyJWT, verifyAdmin, async (req, res) => {
 
@@ -251,6 +270,8 @@ async function run() {
             res.send(result);
 
         })
+
+        //----------------------------------------------------------------------------------------
 
 
         app.post('/bookings', async (req, res) => {
@@ -265,6 +286,62 @@ async function run() {
             const result = await bookingCollection.insertOne(bookings);
             return res.send({ success: true, result });
         })
+
+        // -------------------------------------------------------------------------
+
+        // this part is for task management website.
+
+        app.get('/complete', async (req, res) => {
+
+            const query = {}
+            const cursor = completeCollection.find(query);
+            const complete = await cursor.toArray();
+            res.send(complete)
+        })
+
+        app.post('/complete', async (req, res) => {
+
+            const theTask = req.body;
+            const result = await completeCollection.insertOne(theTask);
+            res.send(result)
+        })
+
+        app.post('/done', async (req, res) => {
+
+            const theDeed = req.body;
+            const result = await doneCollection.insertOne(theDeed);
+            res.send(result)
+        })
+
+        app.get('/done', async (req, res) => {
+
+            const query = {}
+            const cursor = doneCollection.find(query);
+            const done = await cursor.toArray();
+            res.send(done)
+        })
+
+
+        app.put('/complete/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateTaskData = req.body
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+
+                    task: updateTaskData.task,
+
+                }
+            };
+
+            const result = await completeCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
+
+
+        //--------------------------------------------------------------------------
     }
     finally {
 
